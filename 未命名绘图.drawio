@@ -1,0 +1,19 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" version="26.0.13">
+  <diagram name="第 1 页" id="qsHhtbDkLplmXRqeUijR">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="_d6DBcrehEMTIXo2baaa-2" value="&lt;p style=&quot;line-height: 1.6;&quot;&gt;bilibili_ai_lottery_analyzer.py&lt;/p&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="350" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="_d6DBcrehEMTIXo2baaa-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="_d6DBcrehEMTIXo2baaa-3" target="_d6DBcrehEMTIXo2baaa-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_d6DBcrehEMTIXo2baaa-3" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;功能：自数据库中萃取数据，继而运用AI智慧甄别抽奖真伪，精准捕捉字里行间所蕴含的奖品详情（种类俱全），参与路径，活动截止时刻，以及兑奖有效期。&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="205" y="190" width="390" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
