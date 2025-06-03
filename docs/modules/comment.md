@@ -11,7 +11,11 @@ bilibili_api.comment
 + 专栏：cv{9762979} `get_cvid()`。
 + 动态/图文：{116859542} `await get_rid()`。
 + 课程：ep{5556} `get_epid()`
++ 音频：au{13998} `get_auid()`
++ 歌单：am{26241} `get_amid()`
 + 小黑屋: ban/{2600321} `get_id()`
++ 漫画：mc{32749} `get_manga_id()`
++ 活动: {16279} `await get_activity_aid()`
 
 
 ``` python
@@ -45,7 +49,7 @@ from bilibili_api import comment
 
 | name | type | description |
 | - | - | - |
-| credential | Credential | 凭据类 |
+| `credential` | `Credential` | 凭据类 |
 
 
 ### def \_\_init\_\_()
@@ -53,10 +57,10 @@ from bilibili_api import comment
 
 | name | type | description |
 | - | - | - |
-| oid | int | 评论所在资源 ID。 |
-| type_ | ResourceType | 评论所在资源类型枚举。 |
-| rpid | int | 评论 ID。 |
-| credential | Credential | 凭据类. Defaults to None. |
+| `oid` | `int` | 评论所在资源 ID。 |
+| `type_` | `ResourceType` | 评论所在资源类型枚举。 |
+| `rpid` | `int` | 评论 ID。 |
+| `credential` | `Credential` | 凭据类. Defaults to None. |
 
 
 ### async def delete()
@@ -65,7 +69,7 @@ from bilibili_api import comment
 
 
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -76,7 +80,7 @@ from bilibili_api import comment
 
 
 
-**Returns:** int: oid
+**Returns:** `int`:  oid
 
 
 
@@ -87,7 +91,7 @@ from bilibili_api import comment
 
 
 
-**Returns:** int: rpid
+**Returns:** `int`:  rpid
 
 
 
@@ -99,10 +103,10 @@ from bilibili_api import comment
 
 | name | type | description |
 | - | - | - |
-| page_index | int, optional | 页码索引，从 1 开始。Defaults to 1. |
-| page_size | int, optional | 每页评论数。设置大于20的数值不会起作用。Defaults to 10. |
+| `page_index` | `int, optional` | 页码索引，从 1 开始。Defaults to 1. |
+| `page_size` | `int, optional` | 每页评论数。设置大于20的数值不会起作用。Defaults to 10. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -113,7 +117,7 @@ from bilibili_api import comment
 
 
 
-**Returns:** CommentResourceType: 资源类型
+**Returns:** `CommentResourceType`:  资源类型
 
 
 
@@ -125,9 +129,9 @@ from bilibili_api import comment
 
 | name | type | description |
 | - | - | - |
-| status | bool, optional | 状态, Defaults to True. |
+| `status` | `bool, optional` | 状态, Defaults to True. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -139,9 +143,9 @@ from bilibili_api import comment
 
 | name | type | description |
 | - | - | - |
-| status | bool, optional | 状态, Defaults to True. |
+| `status` | `bool, optional` | 状态, Defaults to True. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -153,9 +157,9 @@ from bilibili_api import comment
 
 | name | type | description |
 | - | - | - |
-| status | bool, optional | 状态, Defaults to True. |
+| `status` | `bool, optional` | 状态, Defaults to True. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -167,10 +171,10 @@ from bilibili_api import comment
 
 | name | type | description |
 | - | - | - |
-| report_reason | ReportReason | 举报类型枚举 |
-| content | str, optional | 其他举报备注内容仅 reason=ReportReason.OTHER 可用且不能为 None. |
+| `report_reason` | `ReportReason` | 举报类型枚举 |
+| `content` | `str, optional` | 其他举报备注内容仅 reason=ReportReason.OTHER 可用且不能为 None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 Error Code:
@@ -209,6 +213,7 @@ Error Code:
 + CHEESE: 课程
 + BLACK_ROOM: 小黑屋
 + MANGA: 漫画
++ ACTIVITY: 活动
 
 
 
@@ -268,13 +273,13 @@ Error Code:
 
 | name | type | description |
 | - | - | - |
-| oid | int | 资源 ID。 |
-| type_ | CommentsResourceType | 资源类枚举。 |
-| page_index | int, optional | 页码. Defaults to 1. |
-| order | OrderType, optional | 排序方式枚举. Defaults to OrderType.TIME. |
-| credential | Credential, optional | 凭据。Defaults to None. |
+| `oid` | `int` | 资源 ID。 |
+| `type_` | `CommentsResourceType` | 资源类枚举。 |
+| `page_index` | `int, optional` | 页码. Defaults to 1. |
+| `order` | `OrderType, optional` | 排序方式枚举. Defaults to OrderType.TIME. |
+| `credential` | `Credential, optional` | 凭据。Defaults to None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -290,13 +295,13 @@ Error Code:
 
 | name | type | description |
 | - | - | - |
-| oid | int | 资源 ID。 |
-| type_ | CommentsResourceType | 资源类枚举。 |
-| offset | str, optional | 偏移量。每次请求可获取下次请求对应的偏移量，类似单向链表。对应返回结果的 `["cursor"]["pagination_reply"]["next_offset"]` |
-| order | OrderType, optional | 排序方式枚举. Defaults to OrderType.TIME. |
-| credential | Credential, optional | 凭据。Defaults to None. |
+| `oid` | `int` | 资源 ID。 |
+| `type_` | `CommentsResourceType` | 资源类枚举。 |
+| `offset` | `str, optional` | 偏移量。每次请求可获取下次请求对应的偏移量，类似单向链表。对应返回结果的 `["cursor"]["pagination_reply"]["next_offset"]` |
+| `order` | `OrderType, optional` | 排序方式枚举. Defaults to OrderType.TIME. |
+| `credential` | `Credential, optional` | 凭据。Defaults to None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -318,14 +323,14 @@ Error Code:
 
 | name | type | description |
 | - | - | - |
-| text | str | 评论内容。 |
-| oid | str | 资源 ID。 |
-| type_ | CommentsResourceType | 资源类型枚举。 |
-| root | int, optional | 根评论 ID, Defaults to None. |
-| parent | int, optional | 父评论 ID, Defaults to None. |
-| credential | Credential | 凭据 |
+| `text` | `str` | 评论内容。 |
+| `oid` | `str` | 资源 ID。 |
+| `type_` | `CommentsResourceType` | 资源类型枚举。 |
+| `root` | `int, optional` | 根评论 ID, Defaults to None. |
+| `parent` | `int, optional` | 父评论 ID, Defaults to None. |
+| `credential` | `Credential` | 凭据 |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 

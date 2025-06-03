@@ -20,7 +20,7 @@ from .exceptions.ArgsException import ArgsException
 
 def json2srt(input_path: str, output_path: str):
     data = json.load(open(input_path, "r"))
-    with open(output_path, "w+") as file:
+    with open(output_path, "w+", encoding="utf-8") as file:
         for cnt, comment in enumerate(data["body"]):
             file.write(
                 "{}\n{}:{}:{},{} --> {}:{}:{},{}\n{}\n\n".format(
@@ -123,6 +123,8 @@ async def make_ass_file_subtitle(
     """
     生成视频字幕文件
 
+    编码默认采用 utf-8
+
     Args:
         obj        (Union[Video,Episode]): 对象
 
@@ -161,11 +163,11 @@ async def make_ass_file_subtitle(
                 url = "https:" + url
             req = await Api(url=url, method="GET").request(raw=True)
             file_dir = gettempdir() + "/" + "subtitle.json"
-            with open(file_dir, "w+") as f:
+            with open(file_dir, "w+", encoding="utf-8") as f:
                 f.write(json.dumps(req))
             export_ass_from_json(file_dir, out)
             return
-    raise ValueError("没有找到指定字幕")
+    raise ArgsException("没有找到指定字幕")
 
 
 async def make_ass_file_danmakus_protobuf(
@@ -173,7 +175,6 @@ async def make_ass_file_danmakus_protobuf(
     page: int = 0,
     out="test.ass",
     cid: Union[int, None] = None,
-    credential: Union[Credential, None] = None,
     date=None,
     font_name="Simsun",
     font_size=25.0,
@@ -184,7 +185,9 @@ async def make_ass_file_danmakus_protobuf(
     """
     生成视频弹幕文件
 
-    来源：protobuf
+    弹幕数据来源于 protobuf 接口
+
+    编码默认采用 utf-8
 
     Args:
         obj         (Union[Video,Episode,CheeseVideo])       : 对象
@@ -194,8 +197,6 @@ async def make_ass_file_danmakus_protobuf(
         out         (str, optional)                          : 输出文件. Defaults to "test.ass"
 
         cid         (int | None, optional)                   : cid. Defaults to None.
-
-        credential  (Credential | None, optional)            : 凭据. Defaults to None.
 
         date        (datetime.date, optional)                : 获取时间. Defaults to None.
 
@@ -209,9 +210,6 @@ async def make_ass_file_danmakus_protobuf(
 
         static_time (float, optional)                        : 静态弹幕持续时间. Defaults to 5.
     """
-    credential = credential if credential else Credential()
-    if date:
-        credential.raise_for_no_sessdata()
     if isinstance(obj, Video):
         v = obj
         if isinstance(obj, Episode):
@@ -241,7 +239,7 @@ async def make_ass_file_danmakus_protobuf(
         stage_size = (1440, 1080)
         danmakus = await obj.get_danmakus()
     else:
-        raise ValueError("请传入 Video/Episode/CheeseVideo 类！")
+        raise ArgsException("请传入 Video/Episode/CheeseVideo 类！")
     with open(gettempdir() + "/danmaku_temp.xml", "w+", encoding="utf-8") as file:
         file.write("<i>")
         for d in danmakus:
@@ -273,7 +271,9 @@ async def make_ass_file_danmakus_xml(
     """
     生成视频弹幕文件
 
-    来源：xml
+    弹幕数据来源于 xml 接口
+
+    编码默认采用 utf-8
 
     Args:
         obj         (Union[Video,Episode,Cheese]): 对象
@@ -322,7 +322,7 @@ async def make_ass_file_danmakus_xml(
         stage_size = (1440, 1080)
         xml_content = await obj.get_danmaku_xml()
     else:
-        raise ValueError("请传入 Video/Episode/CheeseVideo 类！")
+        raise ArgsException("请传入 Video/Episode/CheeseVideo 类！")
     with open(gettempdir() + "/danmaku_temp.xml", "w+", encoding="utf-8") as file:
         file.write(xml_content)
     export_ass_from_xml(

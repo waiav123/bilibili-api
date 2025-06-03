@@ -26,14 +26,21 @@ from .utils.network import (
     unregister_client,
     select_client,
     get_selected_client,
+    get_available_settings,
+    get_registered_clients,
+    get_registered_available_settings,
     get_client,
     get_session,
     set_session,
-    get_registered_clients,
+    # anti spider
+    recalculate_wbi,
+    refresh_buvid,
+    refresh_bili_ticket,
     # credential
     Credential,
     # api
     HEADERS,
+    bili_simple_download,
 )
 from .utils.AsyncEvent import AsyncEvent
 from .utils.geetest import Geetest, GeetestMeta, GeetestType
@@ -44,6 +51,7 @@ from .exceptions import (
     CredentialNoAcTimeValueException,
     CredentialNoBiliJctException,
     CredentialNoBuvid3Exception,
+    CredentialNoBuvid4Exception,
     CredentialNoDedeUserIDException,
     CredentialNoSessdataException,
     DanmakuClosedException,
@@ -60,6 +68,7 @@ from .exceptions import (
     WbiRetryTimesExceedException,
 )
 from . import (
+    activity,
     app,
     article_category,
     article,
@@ -103,18 +112,13 @@ from . import (
 )
 
 
-BILIBILI_API_VERSION = "17.1.0"
+BILIBILI_API_VERSION = "17.2.1"
 
 
 def __register_all_clients():
     import importlib
-
-    all_clients = [
-        ("curl_cffi", "CurlCFFIClient"),
-        ("aiohttp", "AioHTTPClient"),
-        ("httpx", "HTTPXClient"),
-    ][::-1]
-    for module, client in all_clients:
+    from .clients import ALL_PROVIDED_CLIENTS
+    for module, client, settings in ALL_PROVIDED_CLIENTS[::-1]:
         try:
             importlib.import_module(module)
         except ModuleNotFoundError:
@@ -123,7 +127,7 @@ def __register_all_clients():
             name=f".clients.{client}", package="bilibili_api"
         )
         client_class = eval(f"client_module.{client}")
-        register_client(module, client_class)
+        register_client(module, client_class, settings)
 
 
 __register_all_clients()
@@ -143,6 +147,7 @@ __all__ = [
     "CredentialNoAcTimeValueException",
     "CredentialNoBiliJctException",
     "CredentialNoBuvid3Exception",
+    "CredentialNoBuvid4Exception",
     "CredentialNoDedeUserIDException",
     "CredentialNoSessdataException",
     "Danmaku",
@@ -168,6 +173,7 @@ __all__ = [
     "VideoUploadException",
     "WbiRetryTimesExceedException",
     "aid2bvid",
+    "activity",
     "app",
     "article",
     "article_category",
@@ -175,6 +181,7 @@ __all__ = [
     "audio",
     "audio_uploader",
     "bangumi",
+    "bili_simple_download",
     "black_room",
     "bvid2aid",
     "channel_series",
@@ -187,8 +194,10 @@ __all__ = [
     "favorite_list",
     "festival",
     "game",
+    "get_available_settings",
     "get_client",
     "get_real_url",
+    "get_registered_available_settings",
     "get_registered_clients",
     "get_selected_client",
     "get_session",
@@ -204,6 +213,9 @@ __all__ = [
     "opus",
     "parse_link",
     "rank",
+    "recalculate_wbi",
+    "refresh_bili_ticket",
+    "refresh_buvid",
     "register_client",
     "request_log",
     "request_settings",

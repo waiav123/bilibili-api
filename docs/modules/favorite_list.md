@@ -46,7 +46,7 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| credential | Credential | 凭据类 |
+| `credential` | `Credential` | 凭据类 |
 
 
 ### def \_\_init\_\_()
@@ -54,9 +54,9 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| type_ | FavoriteListType, optional | 收藏夹类型. Defaults to FavoriteListType.VIDEO. |
-| media_id | int, optional | 收藏夹号（仅为视频收藏夹时提供）. Defaults to None. |
-| credential | Credential, optional | 凭据类. Defaults to Credential(). |
+| `type_` | `FavoriteListType, optional` | 收藏夹类型. Defaults to FavoriteListType.VIDEO. |
+| `media_id` | `int, optional` | 收藏夹号（仅为视频收藏夹时提供）. Defaults to None. |
+| `credential` | `Credential, optional` | 凭据类. Defaults to Credential(). |
 
 
 ### async def get_content()
@@ -66,9 +66,9 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| page | int, optional | 页码. Defaults to 1. |
+| `page` | `int, optional` | 页码. Defaults to 1. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -77,9 +77,11 @@ from bilibili_api import favorite_list
 
 获取收藏夹所有内容的 ID。
 
+**注意：接口针对番剧剧集视频返回的 id / bvid 实际上对应的是其 epid**
 
 
-**Returns:** dict: 调用 API 返回的结果
+
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -91,13 +93,13 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| page | int, optional | 页码. Defaults to 1. |
-| keyword | str \| None, optional | 搜索关键词. Defaults to None. |
-| order | FavoriteListContentOrder, optional | 排序方式. Defaults to FavoriteListContentOrder.MTIME. |
-| mode | SearchFavoriteListMode, optional | 搜索模式，默认仅当前收藏夹. |
-| tid | int, optional | 分区 ID. Defaults to 0. |
+| `page` | `int, optional` | 页码. Defaults to 1. |
+| `keyword` | `str \| None, optional` | 搜索关键词. Defaults to None. |
+| `order` | `FavoriteListContentOrder, optional` | 排序方式. Defaults to FavoriteListContentOrder.MTIME. |
+| `mode` | `SearchFavoriteListMode, optional` | 搜索模式，默认仅当前收藏夹. |
+| `tid` | `int, optional` | 分区 ID. Defaults to 0. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -108,7 +110,7 @@ from bilibili_api import favorite_list
 
 
 
-**Returns:** FavoriteListType: 收藏夹类型
+**Returns:** `FavoriteListType`:  收藏夹类型
 
 
 
@@ -119,7 +121,7 @@ from bilibili_api import favorite_list
 
 
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -130,7 +132,7 @@ from bilibili_api import favorite_list
 
 
 
-**Returns:** Union[int, None]: media_id
+**Returns:** `Union[int, None]`:  media_id
 
 
 
@@ -141,7 +143,7 @@ from bilibili_api import favorite_list
 
 
 
-**Returns:** bool: 是否为视频收藏夹
+**Returns:** `bool`:  是否为视频收藏夹
 
 
 
@@ -199,10 +201,10 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| media_id | int | 收藏夹 ID |
-| credential | Credential | 凭据 |
+| `media_id` | `int` | 收藏夹 ID |
+| `credential` | `Credential` | 凭据 |
 
-**Returns:** dict: API 调用结果。
+**Returns:** `dict`:  API 调用结果。
 
 
 
@@ -216,12 +218,12 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| media_id_from | int | 要复制的源收藏夹 ID。 |
-| media_id_to | int | 目标收藏夹 ID。 |
-| aids | List[int] | 被复制的视频 ID 列表。 |
-| credential | Credential | 凭据 |
+| `media_id_from` | `int` | 要复制的源收藏夹 ID。 |
+| `media_id_to` | `int` | 目标收藏夹 ID。 |
+| `aids` | `List[int]` | 被复制的视频 ID 列表。 |
+| `credential` | `Credential` | 凭据 |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -235,12 +237,12 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| title | str | 收藏夹名。 |
-| introduction | str, optional | 收藏夹简介. Defaults to ''. |
-| private | bool, optional | 是否为私有. Defaults to False. |
-| credential | Credential, optional | 凭据. Defaults to None. |
+| `title` | `str` | 收藏夹名。 |
+| `introduction` | `str, optional` | 收藏夹简介. Defaults to ''. |
+| `private` | `bool, optional` | 是否为私有. Defaults to False. |
+| `credential` | `Credential, optional` | 凭据. Defaults to None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -254,10 +256,10 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| media_ids | List[int] | 收藏夹 ID 列表。 |
-| credential | Credential | Credential. |
+| `media_ids` | `List[int]` | 收藏夹 ID 列表。 |
+| `credential` | `Credential` | Credential. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -271,11 +273,11 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| media_id | int | 收藏夹 ID。 |
-| aids | List[int] | 被删除的视频 ID 列表。 |
-| credential | Credential | 凭据 |
+| `media_id` | `int` | 收藏夹 ID。 |
+| `aids` | `List[int]` | 被删除的视频 ID 列表。 |
+| `credential` | `Credential` | 凭据 |
 
-**Returns:** dict: API 调用结果。
+**Returns:** `dict`:  API 调用结果。
 
 
 
@@ -289,10 +291,10 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| page | int, optional | 页码. Defaults to 1. |
-| credential | Credential \| None, optional | Credential. Defaults to None. |
+| `page` | `int, optional` | 页码. Defaults to 1. |
+| `credential` | `Credential \| None, optional` | Credential. Defaults to None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -306,10 +308,10 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| page | int, optional | 页码. Defaults to 1. |
-| credential | Credential \| None, optional | Credential. Defaults to None. |
+| `page` | `int, optional` | 页码. Defaults to 1. |
+| `credential` | `Credential \| None, optional` | Credential. Defaults to None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -323,12 +325,11 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| uid | int | 用户 UID。 |
-| pn | int, optional | 页码. Defaults to 1. |
-| ps | int, optional | 每页数据大小. Defaults to 20. |
-| credential | Credential \| None, optional | Credential. Defaults to None. |
+| `uid` | `int` | 用户 UID。 |
+| `pn` | `int, optional` | 页码. Defaults to 1. |
+| `ps` | `int, optional` | 每页数据大小. Defaults to 20. |
+| `credential` | `Credential \| None, optional` | Credential. Defaults to None. |
 
-**Returns:** None
 
 
 
@@ -341,10 +342,10 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| page | int, optional | 页码. Defaults to 1. |
-| credential | Credential \| None, optional | Credential. Defaults to None. |
+| `page` | `int, optional` | 页码. Defaults to 1. |
+| `credential` | `Credential \| None, optional` | Credential. Defaults to None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -358,10 +359,10 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| page | int, optional | 页码. Defaults to 1. |
-| credential | Credential \| None, optional | Credential |
+| `page` | `int, optional` | 页码. Defaults to 1. |
+| `credential` | `Credential \| None, optional` | Credential |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -375,11 +376,11 @@ from bilibili_api import favorite_list
 
 | name | type | description |
 | - | - | - |
-| uid | int | 用户 UID。 |
-| video | Video \| None, optional | 视频类。若提供该参数则结果会附带该收藏夹是否存在该视频。Defaults to None. |
-| credential | Credential \| None, optional | 凭据. Defaults to None. |
+| `uid` | `int` | 用户 UID。 |
+| `video` | `Video \| None, optional` | 视频类。若提供该参数则结果会附带该收藏夹是否存在该视频。Defaults to None. |
+| `credential` | `Credential \| None, optional` | 凭据. Defaults to None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -395,15 +396,15 @@ mode 参数见 SearchFavoriteListMode 枚举。
 
 | name | type | description |
 | - | - | - |
-| media_id | int | 收藏夹 ID。 |
-| page | int, optional | 页码. Defaults to 1. |
-| keyword | str, optional | 搜索关键词. Defaults to None. |
-| order | FavoriteListContentOrder, optional | 排序方式. Defaults to FavoriteListContentOrder.MTIME. |
-| tid | int, optional | 分区 ID. Defaults to 0. |
-| mode | SearchFavoriteListMode, optional | 搜索模式，默认仅当前收藏夹. |
-| credential | Credential, optional | Credential. Defaults to None. |
+| `media_id` | `int` | 收藏夹 ID。 |
+| `page` | `int, optional` | 页码. Defaults to 1. |
+| `keyword` | `str, optional` | 搜索关键词. Defaults to None. |
+| `order` | `FavoriteListContentOrder, optional` | 排序方式. Defaults to FavoriteListContentOrder.MTIME. |
+| `tid` | `int, optional` | 分区 ID. Defaults to 0. |
+| `mode` | `SearchFavoriteListMode, optional` | 搜索模式，默认仅当前收藏夹. |
+| `credential` | `Credential, optional` | Credential. Defaults to None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -417,13 +418,13 @@ mode 参数见 SearchFavoriteListMode 枚举。
 
 | name | type | description |
 | - | - | - |
-| media_id | int | 收藏夹 ID. |
-| title | str | 收藏夹名。 |
-| introduction | str, optional | 收藏夹简介. Defaults to ''. |
-| private | bool, optional | 是否为私有. Defaults to False. |
-| credential | Credential, optional | Credential. Defaults to None. |
+| `media_id` | `int` | 收藏夹 ID. |
+| `title` | `str` | 收藏夹名。 |
+| `introduction` | `str, optional` | 收藏夹简介. Defaults to ''. |
+| `private` | `bool, optional` | 是否为私有. Defaults to False. |
+| `credential` | `Credential, optional` | Credential. Defaults to None. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -437,12 +438,12 @@ mode 参数见 SearchFavoriteListMode 枚举。
 
 | name | type | description |
 | - | - | - |
-| media_id_from | int | 要移动的源收藏夹 ID。 |
-| media_id_to | int | 目标收藏夹 ID。 |
-| aids | List[int] | 被移动的视频 ID 列表。 |
-| credential | Credential | 凭据 |
+| `media_id_from` | `int` | 要移动的源收藏夹 ID。 |
+| `media_id_to` | `int` | 目标收藏夹 ID。 |
+| `aids` | `List[int]` | 被移动的视频 ID 列表。 |
+| `credential` | `Credential` | 凭据 |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 

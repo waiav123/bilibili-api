@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import reduce
-from typing import Dict, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from Cryptodome.Cipher import PKCS1_OAEP
 from Cryptodome.Hash import SHA256
@@ -34,11 +34,13 @@ from ..exceptions import (
     CredentialNoAcTimeValueException,
     CredentialNoBiliJctException,
     CredentialNoBuvid3Exception,
+    CredentialNoBuvid4Exception,
     CredentialNoDedeUserIDException,
     CredentialNoSessdataException,
     ExClimbWuzhiException,
     ResponseCodeException,
     WbiRetryTimesExceedException,
+    NetworkException,
 )
 from .AsyncEvent import AsyncEvent
 from .utils import get_api, raise_for_statement
@@ -60,7 +62,7 @@ class RequestLog(AsyncEvent):
             )
             self.logger.addHandler(handler)
         self.__on = False
-        self.__on_events = [
+        self.__on_events: List[str] = [
             "API_REQUEST",
             "API_RESPONSE",
             "ANTI_SPIDER",
@@ -69,42 +71,42 @@ class RequestLog(AsyncEvent):
             "WS_SEND",
             "WS_CLOSE",
         ]
-        self.__ignore_events = []
+        self.__ignore_events: List[str] = []
         self.add_event_listener("__ALL__", self.__handle_events)
 
-    def get_on_events(self) -> dict:
+    def get_on_events(self) -> List[str]:
         """
         获取日志输出支持的事件类型
 
         Returns:
-            dict: 日志输出支持的事件类型
+            List[str]: 日志输出支持的事件类型
         """
         return self.__on_events
 
-    def set_on_events(self, events: dict) -> None:
+    def set_on_events(self, events: List[str]) -> None:
         """
         设置日志输出支持的事件类型
 
         Args:
-            events (dict): 日志输出支持的事件类型
+            events (List[str]): 日志输出支持的事件类型
         """
         self.__on_events = events
 
-    def get_ignore_events(self) -> dict:
+    def get_ignore_events(self) -> List[str]:
         """
         获取日志输出排除的事件类型
 
         Returns:
-            dict: 日志输出排除的事件类型
+            List[str]: 日志输出排除的事件类型
         """
         return self.__ignore_events
 
-    def set_ignore_events(self, events: dict) -> None:
+    def set_ignore_events(self, events: List[str]) -> None:
         """
         设置日志输出排除的事件类型
 
         Args:
-            events (dict): 日志输出排除的事件类型
+            events (List[str]): 日志输出排除的事件类型
         """
         self.__ignore_events = events
 
@@ -175,8 +177,10 @@ Events:
 
 CallbackData: 描述 (str) 数据 (dict)
 
+示例：
+
 ``` python
-@request_log.on("__ALL__")
+@request_log.on("REQUEST")
 async def handle(desc: str, data: dict) -> None:
     print(desc, data)
 ```
@@ -211,8 +215,10 @@ Events:
 
 CallbackData: 描述 (str) 数据 (dict)
 
+示例：
+
 ``` python
-@request_log.on("__ALL__")
+@request_log.on("REQUEST")
 async def handle(desc: str, data: dict) -> None:
     print(desc, data)
 ```
@@ -229,16 +235,55 @@ async def handle(desc: str, data: dict) -> None:
 
 sessions: Dict[str, Type["BiliAPIClient"]] = {}
 session_pool: Dict[str, Dict[asyncio.AbstractEventLoop, "BiliAPIClient"]] = {}
+client_settings: Dict[str, list] = {}
 selected_client: str = ""
 
 
 class RequestSettings:
     def __init__(self):
-        self.__proxy: str = ""
-        self.__timeout: float = 5.0
-        self.__verify_ssl: bool = True
-        self.__trust_env: bool = True
-        self.__wbi_retry_times: int = 3
+        self.__settings: dict = {
+            "proxy": "",
+            "timeout": 5.0,
+            "verify_ssl": True,
+            "trust_env": True,
+        }
+        self.__wbi_retry_times = 3
+        self.__enable_auto_buvid = True
+        self.__enable_bili_ticket = False
+
+    def get(self, name: str) -> Any:
+        """
+        获取某项设置
+
+        不可用于 `wbi_retry_times` `enable_auto_buvid` `enable_bili_ticket`
+
+        默认设置名称：`proxy` `timeout` `verify_ssl` `trust_env`
+
+        Args:
+            name (str): 设置名称
+
+        Returns:
+            Any: 设置的值
+        """
+        return self.__settings[name]
+
+    def set(self, name: str, value: Any) -> None:
+        """
+        设置某项设置
+
+        不可用于 `wbi_retry_times` `enable_auto_buvid` `enable_bili_ticket`
+
+        默认设置名称：`proxy` `timeout` `verify_ssl` `trust_env`
+
+        Args:
+            name  (str): 设置名称
+            value (str): 设置的值
+        """
+        global session_pool
+        self.__settings[name] = value
+        for _, pool in session_pool.items():
+            for _, client in pool.items():
+                client.__getattribute__(f"set_{name}")(value)
 
     def get_proxy(self) -> str:
         """
@@ -247,7 +292,7 @@ class RequestSettings:
         Returns:
             str: 代理地址. Defaults to "".
         """
-        return self.__proxy
+        return self.get("proxy")
 
     def set_proxy(self, proxy: str):
         """
@@ -256,11 +301,7 @@ class RequestSettings:
         Args:
             proxy (str): 代理地址
         """
-        global session_pool
-        self.__proxy = proxy
-        for _, pool in session_pool.items():
-            for _, client in pool.items():
-                client.set_proxy(proxy)
+        self.set("proxy", proxy)
 
     def get_timeout(self) -> float:
         """
@@ -269,7 +310,7 @@ class RequestSettings:
         Returns:
             float: 超时时间. Defaults to 5.0.
         """
-        return self.__timeout
+        return self.get("timeout")
 
     def set_timeout(self, timeout: float):
         """
@@ -278,11 +319,7 @@ class RequestSettings:
         Args:
             timeout (float): 超时时间
         """
-        global session_pool
-        self.__timeout = timeout
-        for _, pool in session_pool.items():
-            for _, client in pool.items():
-                client.set_timeout(timeout)
+        self.set("timeout", timeout)
 
     def get_verify_ssl(self) -> bool:
         """
@@ -291,7 +328,7 @@ class RequestSettings:
         Returns:
             bool: 是否验证 SSL. Defaults to True.
         """
-        return self.__verify_ssl
+        return self.get("verify_ssl")
 
     def set_verify_ssl(self, verify_ssl: bool):
         """
@@ -300,11 +337,7 @@ class RequestSettings:
         Args:
             verify_ssl (bool): 是否验证 SSL
         """
-        global session_pool
-        self.__verify_ssl = verify_ssl
-        for _, pool in session_pool.items():
-            for _, client in pool.items():
-                client.set_verify_ssl(verify_ssl)
+        self.set("verify_ssl", verify_ssl)
 
     def get_trust_env(self) -> bool:
         """
@@ -313,7 +346,7 @@ class RequestSettings:
         Returns:
             bool: `trust_env`. Defaults to True.
         """
-        return self.__trust_env
+        return self.get("trust_env")
 
     def set_trust_env(self, trust_env: bool):
         """
@@ -322,11 +355,7 @@ class RequestSettings:
         Args:
             verify_ssl (bool): `trust_env`
         """
-        global session_pool
-        self.__trust_env = trust_env
-        for _, pool in session_pool.items():
-            for _, client in pool.items():
-                client.set_trust_env(trust_env)
+        self.set("trust_env", trust_env)
 
     def get_wbi_retry_times(self) -> int:
         """
@@ -346,10 +375,59 @@ class RequestSettings:
         """
         self.__wbi_retry_times = wbi_retry_times
 
+    def get_enable_auto_buvid(self) -> bool:
+        """
+        获取设置的是否自动生成 buvid
+
+        Returns:
+            bool: 是否自动生成 buvid. Defaults to True.
+        """
+        return self.__enable_auto_buvid
+
+    def set_enable_auto_buvid(self, enable_auto_buvid: bool) -> None:
+        """
+        设置是否自动生成 buvid
+
+        Args:
+            enable_auto_buvid (bool): 是否自动生成 buvid.
+        """
+        self.__enable_auto_buvid = enable_auto_buvid
+
+    def get_enable_bili_ticket(self) -> bool:
+        """
+        获取设置的是否使用 bili_ticket
+
+        Returns:
+            bool: 是否使用 bili_ticket. Defaults to True.
+        """
+        return self.__enable_bili_ticket
+
+    def set_enable_bili_ticket(self, enable_bili_ticket: bool) -> None:
+        """
+        设置是否使用 bili_ticket
+
+        Args:
+            enable_bili_ticket (bool): 是否使用 bili_ticket.
+        """
+        self.__enable_bili_ticket = enable_bili_ticket
+
+    def get_all(self) -> dict:
+        """
+        获取目前所有的设置项
+
+        不可用于 `wbi_retry_times` `enable_auto_buvid` `enable_bili_ticket`
+
+        Returns:
+            dict: 所有的设置项
+        """
+        return self.__settings
+
 
 request_settings = RequestSettings()
 "请求参数设置"
 request_settings.__doc__ = "请求参数设置"
+
+DEFAULT_SETTINGS = ["proxy", "timeout", "verify_ssl", "trust_env"]
 
 
 @dataclass
@@ -520,7 +598,7 @@ class BiliAPIClient(ABC):
             files: Dict[str, BiliAPIFile] = {},
             headers: dict = {},
             cookies: dict = {},
-            allow_redirects: bool = False,
+            allow_redirects: bool = True,
         ) -> BiliAPIResponse:
             """
             进行 HTTP 请求
@@ -533,7 +611,7 @@ class BiliAPIClient(ABC):
                 files (Dict[str, BiliAPIFile], optional): 请求文件. Defaults to {}.
                 headers (dict, optional): 请求头. Defaults to {}.
                 cookies (dict, optional): 请求 Cookies. Defaults to {}.
-                allow_redirects (bool, optional): 是否允许重定向. Defaults to False.
+                allow_redirects (bool, optional): 是否允许重定向. Defaults to True.
 
             Returns:
                 BiliAPIResponse: 响应对象
@@ -729,7 +807,7 @@ class BiliAPIClient(ABC):
         files: Dict[str, BiliAPIFile] = {},
         headers: dict = {},
         cookies: dict = {},
-        allow_redirects: bool = False,
+        allow_redirects: bool = True,
     ) -> BiliAPIResponse:
         """
         进行 HTTP 请求
@@ -742,7 +820,7 @@ class BiliAPIClient(ABC):
             files (Dict[str, BiliAPIFile], optional): 请求文件. Defaults to {}.
             headers (dict, optional): 请求头. Defaults to {}.
             cookies (dict, optional): 请求 Cookies. Defaults to {}.
-            allow_redirects (bool, optional): 是否允许重定向. Defaults to False.
+            allow_redirects (bool, optional): 是否允许重定向. Defaults to True.
 
         Returns:
             BiliAPIResponse: 响应对象
@@ -856,13 +934,14 @@ class BiliAPIClient(ABC):
         raise NotImplementedError
 
 
-def register_client(name: str, cls: type) -> None:
+def register_client(name: str, cls: type, settings: dict = {}) -> None:
     """
     注册请求客户端并切换，可用于用户自定义请求客户端。
 
     Args:
-        name (str): 请求客户端类型名称，用户自定义命名。
-        cls  (type): 基于 BiliAPIClient 重写后的请求客户端类。
+        name     (str): 请求客户端类型名称，用户自定义命名。
+        cls      (type): 基于 BiliAPIClient 重写后的请求客户端类。
+        settings (dict): 请求客户端在基础设置外的其他设置，键为设置名称，值为设置默认值。Defaults to {}.
     """
     global sessions, session_pool
     raise_for_statement(
@@ -871,6 +950,10 @@ def register_client(name: str, cls: type) -> None:
     sessions[name] = cls
     session_pool[name] = {}
     select_client(name)
+    for key, value in settings.items():
+        request_settings.set(key, value)
+    client_settings[name] = DEFAULT_SETTINGS.copy()
+    client_settings[name] += list(settings.keys())
 
 
 def unregister_client(name: str) -> None:
@@ -908,7 +991,45 @@ def get_selected_client() -> Tuple[str, Type[BiliAPIClient]]:
     Returns:
         Tuple[str, Type[BiliAPIClient]]: 第 0 项为客户端名称，第 1 项为对应的类
     """
+    if selected_client == "":
+        raise ArgsException(
+            "尚未安装第三方请求库或未注册自定义第三方请求库。\n$ pip3 install (curl_cffi|httpx|aiohttp)"
+        )
     return selected_client, sessions[selected_client]
+
+
+def get_available_settings() -> List[str]:
+    """
+    获取当前支持的设置项
+
+    Returns:
+        List[str]: 支持的设置项名称
+    """
+    if selected_client == "":
+        raise ArgsException(
+            "尚未安装第三方请求库或未注册自定义第三方请求库。\n$ pip3 install (curl_cffi|httpx|aiohttp)"
+        )
+    return client_settings[selected_client]
+
+
+def get_registered_clients() -> Dict[str, Type[BiliAPIClient]]:
+    """
+    获取所有注册过的 BiliAPIClient
+
+    Returns:
+        Dict[str, Type[BiliAPIClient]]: 注册过的 BiliAPIClient
+    """
+    return sessions
+
+
+def get_registered_available_settings() -> Dict[str, List[str]]:
+    """
+    获取所有注册过的 BiliAPIClient 所支持的设置项
+
+    Returns:
+        Dict[str, List[str]]: 所有注册过的 BiliAPIClient 所支持的设置项
+    """
+    return client_settings
 
 
 def get_client() -> BiliAPIClient:
@@ -920,7 +1041,7 @@ def get_client() -> BiliAPIClient:
     """
     if selected_client == "":
         raise ArgsException(
-            "尚未安装第三方请求库或未注册自定义第三方请求库。\n$ pip3 install (curl_cffi==0.8.1b9|httpx|aiohttp)"
+            "尚未安装第三方请求库或未注册自定义第三方请求库。\n$ pip3 install (curl_cffi|httpx|aiohttp)"
         )
     global session_pool
     pool = session_pool.get(selected_client)
@@ -929,12 +1050,10 @@ def get_client() -> BiliAPIClient:
     loop = asyncio.get_event_loop()
     session = pool.get(loop)
     if session is None:
-        session = sessions[selected_client](
-            proxy=request_settings.get_proxy(),
-            timeout=request_settings.get_timeout(),
-            verify_ssl=request_settings.get_verify_ssl(),
-            trust_env=request_settings.get_trust_env(),
-        )
+        kwargs = {}
+        for piece in client_settings[selected_client]:
+            kwargs[piece] = request_settings.get(piece)
+        session = sessions[selected_client](**kwargs)
         session_pool[selected_client][loop] = session
     return session
 
@@ -962,16 +1081,6 @@ def set_session(session: object) -> None:
         raise ArgsException("未找到用户指定的请求客户端。")
     loop = asyncio.get_event_loop()
     session_pool[selected_client][loop] = sessions[selected_client](session=session)
-
-
-def get_registered_clients() -> Dict[str, Type[BiliAPIClient]]:
-    """
-    获取所有注册过的 BiliAPIClient
-
-    Returns:
-        Dict[str, Type[BiliAPIClient]]: 注册过的 BiliAPIClient
-    """
-    return sessions
 
 
 @atexit.register
@@ -1011,6 +1120,7 @@ class Credential:
         sessdata: Union[str, None] = None,
         bili_jct: Union[str, None] = None,
         buvid3: Union[str, None] = None,
+        buvid4: Union[str, None] = None,
         dedeuserid: Union[str, None] = None,
         ac_time_value: Union[str, None] = None,
     ) -> None:
@@ -1023,6 +1133,8 @@ class Credential:
             bili_jct   (str | None, optional): 浏览器 Cookies 中的 bili_jct 字段值. Defaults to None.
 
             buvid3     (str | None, optional): 浏览器 Cookies 中的 BUVID3 字段值. Defaults to None.
+
+            buvid4     (str | None, optional): 浏览器 Cookies 中的 BUVID4 字段值. Defaults to None.
 
             dedeuserid (str | None, optional): 浏览器 Cookies 中的 DedeUserID 字段值. Defaults to None.
 
@@ -1037,6 +1149,7 @@ class Credential:
         )
         self.bili_jct = bili_jct
         self.buvid3 = buvid3
+        self.buvid4 = buvid4
         self.dedeuserid = dedeuserid
         self.ac_time_value = ac_time_value
 
@@ -1050,6 +1163,26 @@ class Credential:
         cookies = {
             "SESSDATA": self.sessdata if self.sessdata else "",
             "buvid3": self.buvid3 if self.buvid3 else "",
+            "buvid4": self.buvid4 if self.buvid4 else "",
+            "bili_jct": self.bili_jct if self.bili_jct else "",
+            "ac_time_value": self.ac_time_value if self.ac_time_value else "",
+        }
+        if self.dedeuserid:
+            cookies.update({"DedeUserID": self.dedeuserid})
+
+        return cookies
+
+    async def get_buvid_cookies(self) -> dict:
+        """
+        获取请求 Cookies 字典，自动补充 buvid 字段
+
+        Returns:
+            dict: 请求 Cookies 字典
+        """
+        cookies = {
+            "SESSDATA": self.sessdata if self.sessdata else "",
+            "buvid3": self.buvid3 if self.buvid3 else (await get_buvid())[0],
+            "buvid4": self.buvid4 if self.buvid4 else (await get_buvid())[1],
             "bili_jct": self.bili_jct if self.bili_jct else "",
             "ac_time_value": self.ac_time_value if self.ac_time_value else "",
         }
@@ -1063,16 +1196,16 @@ class Credential:
         是否提供 dedeuserid。
 
         Returns:
-            bool。
+            bool: 是否提供 dedeuserid。
         """
-        return self.dedeuserid is not None and self.sessdata != ""
+        return self.dedeuserid is not None and self.dedeuserid != ""
 
     def has_sessdata(self) -> bool:
         """
         是否提供 sessdata。
 
         Returns:
-            bool。
+            bool: 是否提供 sessdata。
         """
         return self.sessdata is not None and self.sessdata != ""
 
@@ -1081,27 +1214,36 @@ class Credential:
         是否提供 bili_jct。
 
         Returns:
-            bool。
+            bool: 是否提供 bili_jct。
         """
-        return self.bili_jct is not None and self.sessdata != ""
+        return self.bili_jct is not None and self.bili_jct != ""
 
     def has_buvid3(self) -> bool:
         """
         是否提供 buvid3
 
         Returns:
-            bool.
+            bool: 是否提供 buvid3
         """
-        return self.buvid3 is not None and self.sessdata != ""
+        return self.buvid3 is not None and self.buvid3 != ""
+
+    def has_buvid4(self) -> bool:
+        """
+        是否提供 buvid4
+
+        Returns:
+            bool: 是否提供 buvid4
+        """
+        return self.buvid4 is not None and self.buvid4 != ""
 
     def has_ac_time_value(self) -> bool:
         """
         是否提供 ac_time_value
 
         Returns:
-            bool.
+            bool: 是否提供 ac_time_value
         """
-        return self.ac_time_value is not None and self.sessdata != ""
+        return self.ac_time_value is not None and self.ac_time_value != ""
 
     def raise_for_no_sessdata(self):
         """
@@ -1123,6 +1265,13 @@ class Credential:
         """
         if not self.has_buvid3():
             raise CredentialNoBuvid3Exception()
+
+    def raise_for_no_buvid4(self):
+        """
+        没有提供 buvid3 时抛出异常。
+        """
+        if not self.has_buvid4():
+            raise CredentialNoBuvid4Exception()
 
     def raise_for_no_dedeuserid(self):
         """
@@ -1181,12 +1330,13 @@ class Credential:
         c.sessdata = cookies.get("SESSDATA")
         c.bili_jct = cookies.get("bili_jct")
         c.buvid3 = cookies.get("buvid3")
+        c.buvid4 = cookies.get("buvid4")
         c.dedeuserid = cookies.get("DedeUserID")
         c.ac_time_value = cookies.get("ac_time_value")
         return c
 
     def __str__(self):
-        return f"SESSDATA: {self.sessdata}; bili_jct: {self.bili_jct}; buvid3: {self.buvid3}; DedeUserID: {self.dedeuserid}; ac_time_value: {self.ac_time_value}"
+        return f"SESSDATA: {self.sessdata}; bili_jct: {self.bili_jct}; buvid3: {self.buvid3}; buvid4: {self.buvid4}; DedeUserID: {self.dedeuserid}; ac_time_value: {self.ac_time_value}"
 
 
 """
@@ -1790,12 +1940,13 @@ async def _get_bili_ticket(credential: Optional[Credential] = None) -> str:
 __buvid3 = ""
 __buvid4 = ""
 __bili_ticket = ""
+__bili_ticket_expires = 0
 __wbi_mixin_key = ""
 
 
 def refresh_buvid() -> None:
     """
-    刷新 buvid3 和 buvid4
+    刷新模块自动生成的 buvid3 和 buvid4
     """
     global __buvid3, __buvid4
     __buvid3 = ""
@@ -1806,13 +1957,14 @@ def refresh_bili_ticket() -> None:
     """
     刷新 bili_ticket
     """
-    global __bili_ticket
+    global __bili_ticket, __bili_ticket_expires
     __bili_ticket = ""
+    __bili_ticket_expires = 0
 
 
-def refresh_wbi_mixin_key() -> None:
+def recalculate_wbi() -> None:
     """
-    刷新 wbi mixin key
+    重新计算 wbi 的参数
     """
     global __wbi_mixin_key
     __wbi_mixin_key = ""
@@ -1839,7 +1991,7 @@ async def get_buvid() -> Tuple[str, str]:
     return (__buvid3, __buvid4)
 
 
-async def get_bili_ticket(credential: Optional[Credential] = None) -> str:
+async def get_bili_ticket(credential: Optional[Credential] = None) -> Tuple[str, str]:
     """
     获取 bili_ticket
 
@@ -1847,17 +1999,20 @@ async def get_bili_ticket(credential: Optional[Credential] = None) -> str:
         credential (Credential, optional): 凭据. Defaults to None.
 
     Returns:
-        str: bili_ticket
+        Tuple[str, str]: bili_ticket, bili_ticket_expires
     """
-    global __bili_ticket
+    global __bili_ticket, __bili_ticket_expires
+    if time.time() > int(__bili_ticket_expires):
+        refresh_bili_ticket()
     if __bili_ticket == "":
         __bili_ticket = await _get_bili_ticket(credential)
+        __bili_ticket_expires = str(int(time.time()) + 3 * 86400)
         request_log.dispatch(
             "ANTI_SPIDER",
             "反爬虫",
             {"msg": f"获取 bili_ticket 成功: [{__bili_ticket}]"},
         )
-    return __bili_ticket
+    return __bili_ticket, __bili_ticket_expires
 
 
 async def get_wbi_mixin_key(credential: Optional[Credential] = None) -> str:
@@ -1897,8 +2052,6 @@ class Api:
 
         wbi2 (bool, optional): 是否使用参数进一步的 wbi 鉴权. Defaults to False.
 
-        bili_ticket (bool, optional): 是否使用 bili_ticket. Defaults to False.
-
         verify (bool, optional): 是否验证凭据. Defaults to False.
 
         no_csrf (bool, optional): 是否不使用 csrf. Defaults to False.
@@ -1919,7 +2072,6 @@ class Api:
     comment: str = ""
     wbi: bool = False
     wbi2: bool = False
-    bili_ticket: bool = False
     verify: bool = False
     no_csrf: bool = False
     json_body: bool = False
@@ -2023,13 +2175,14 @@ class Api:
             self.data["csrf_token"] = self.credential.bili_jct
         # 处理 cookies
         cookies = self.credential.get_cookies()
-        if cookies["buvid3"] == "":
-            cookies["buvid3"] = (await get_buvid())[0]
+        if (cookies["buvid3"] == "" or cookies["buvid4"] == "") and request_settings.get_enable_auto_buvid():
+            buvids = await get_buvid()
+            cookies["buvid3"] = buvids[0]
+            cookies["buvid4"] = buvids[1]
         cookies["opus-goback"] = "1"
         # bili_ticket
-        if self.bili_ticket:
-            cookies["bili_ticket"] = await get_bili_ticket(self.credential)
-            cookies["bili_ticket_expires"] = str(int(time.time()) + 2 * 86400)
+        if request_settings.get_enable_bili_ticket():
+            cookies["bili_ticket"], cookies["bili_ticket_expires"] = await get_bili_ticket(self.credential)
         # APP 鉴权
         if self.sign:
             if self.method in ["POST", "DELETE", "PATCH"]:
@@ -2056,6 +2209,9 @@ class Api:
     def _process_response(
         self, resp: BiliAPIResponse, raw: bool = False
     ) -> Union[int, str, dict, None]:
+        # 检查状态码
+        if resp.code != 200:
+            raise NetworkException(resp.code, resp.utf8_text())
         # 检查响应头 Content-Length
         content_length = resp.headers.get("content-length")
         if content_length and int(content_length) == 0:
@@ -2148,8 +2304,8 @@ class Api:
                 return await self._request(raw=raw, byte=byte)
             except ResponseCodeException as e:
                 # -403 时尝试重新获取 wbi_mixin_key 可能过期了
-                if e.code == -403:
-                    refresh_wbi_mixin_key()
+                if e.code == -403 and self.wbi:
+                    recalculate_wbi()
                     continue
                 # 不是 -403 错误直接报错
                 raise e
@@ -2163,6 +2319,31 @@ class Api:
         获取请求结果
         """
         return await self.request()
+
+
+async def bili_simple_download(url: str, out: str, intro: str):
+    """
+    适用于下载 bilibili 链接的简易终端下载函数
+
+    默认会携带 HEADERS 访问链接，避免 403
+
+    用途举例：下载 video.get_download_url 返回结果中的链接
+
+    Args:
+        url   (str): 链接
+        out   (str): 输出地址
+        intro (str): 下载简述
+    """
+    dwn_id = await get_client().download_create(url, HEADERS)
+    bts = 0
+    tot = get_client().download_content_length(dwn_id)
+    with open(out, "wb") as file:
+        while True:
+            bts += file.write(await get_client().download_chunk(dwn_id))
+            print(f"{intro} - {out} [{bts} / {tot}]", end="\r")
+            if bts == tot:
+                break
+    print()
 
 
 ################################################## END Api ##################################################

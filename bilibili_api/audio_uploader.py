@@ -555,7 +555,7 @@ class AudioUploader(AsyncEvent):
                 "version": "2.6.0",
                 "build": 2060400,
             },
-            cookies=self.credential.get_cookies(),
+            cookies=await self.credential.get_buvid_cookies(),
             headers=HEADERS.copy(),
         )
         if resp.code >= 400:
@@ -825,10 +825,10 @@ async def upload_cover(cover: Picture, credential: Credential) -> str:
     """
     api = _API["image"]
     # 小于 3MB
-    raise_for_statement(os.path.getsize(cover) < 1024 * 1024 * 3, "3MB size limit")
+    raise_for_statement(len(cover.content) < 1024 * 1024 * 3, "3MB size limit")
     # 宽高比 1:1
     raise_for_statement(
-        cover.width == cover.height, "width == height, 600 * 600 recommanded"
+        cover.width == cover.height, "width == height, 600 * 600 recommended"
     )
-    files = {"file": cover.content}
+    files = {"file": cover._to_biliapifile()}
     return await Api(**api, credential=credential).update_files(**files).result

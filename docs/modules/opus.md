@@ -13,6 +13,8 @@ from bilibili_api import opus
 - [class Opus()](#class-Opus)
   - [def \_\_init\_\_()](#def-\_\_init\_\_)
   - [async def add\_coins()](#async-def-add\_coins)
+  - [async def get\_images()](#async-def-get\_images)
+  - [async def get\_images\_raw\_info()](#async-def-get\_images\_raw\_info)
   - [async def get\_info()](#async-def-get\_info)
   - [def get\_opus\_id()](#def-get\_opus\_id)
   - [async def get\_reaction()](#async-def-get\_reaction)
@@ -33,7 +35,7 @@ from bilibili_api import opus
 
 | name | type | description |
 | - | - | - |
-| credential | Credential | 凭据类 |
+| `credential` | `Credential` | 凭据类 |
 
 
 ### def \_\_init\_\_()
@@ -48,7 +50,29 @@ from bilibili_api import opus
 
 
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
+
+
+
+
+### async def get_images()
+
+获取图文所有图片并转为 Picture 类
+
+
+
+**Returns:** `list`:  图片信息
+
+
+
+
+### async def get_images_raw_info()
+
+获取图文所有图片原始信息
+
+
+
+**Returns:** `list`:  图片信息
 
 
 
@@ -59,7 +83,7 @@ from bilibili_api import opus
 
 
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -70,7 +94,7 @@ from bilibili_api import opus
 
 
 
-**Returns:** int: 图文 idd
+**Returns:** `int`:  图文 idd
 
 
 
@@ -82,9 +106,9 @@ from bilibili_api import opus
 
 | name | type | description |
 | - | - | - |
-| offset | str, optional | 偏移值（下一页的第一个动态 ID，为该请求结果中的 offset 键对应的值），类似单向链表. Defaults to "" |
+| `offset` | `str, optional` | 偏移值（下一页的第一个动态 ID，为该请求结果中的 offset 键对应的值），类似单向链表. Defaults to "" |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -95,7 +119,7 @@ from bilibili_api import opus
 
 
 
-**Returns:** int: rid
+**Returns:** `int`:  rid
 
 
 
@@ -108,7 +132,7 @@ from bilibili_api import opus
 
 
 
-**Returns:** bool: 是否同时为专栏
+**Returns:** `bool`:  是否同时为专栏
 
 
 
@@ -119,7 +143,7 @@ from bilibili_api import opus
 
 
 
-**Returns:** str: markdown 内容
+**Returns:** `str`:  markdown 内容
 
 
 
@@ -131,9 +155,9 @@ from bilibili_api import opus
 
 | name | type | description |
 | - | - | - |
-| status | bool, optional | 收藏状态. Defaults to True |
+| `status` | `bool, optional` | 收藏状态. Defaults to True |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -145,9 +169,9 @@ from bilibili_api import opus
 
 | name | type | description |
 | - | - | - |
-| status | bool, optional | 点赞状态. Defaults to True. |
+| `status` | `bool, optional` | 点赞状态. Defaults to True. |
 
-**Returns:** dict: 调用 API 返回的结果
+**Returns:** `dict`:  调用 API 返回的结果
 
 
 
@@ -160,7 +184,7 @@ from bilibili_api import opus
 
 
 
-**Returns:** article.Article: 专栏类
+**Returns:** `article.Article`:  专栏类
 
 
 
@@ -173,7 +197,7 @@ from bilibili_api import opus
 
 
 
-**Returns:** dynamic.Dynamic: 对应的动态类
+**Returns:** `dynamic.Dynamic`:  对应的动态类
 
 
 

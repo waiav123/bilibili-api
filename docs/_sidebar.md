@@ -5,8 +5,9 @@
 + [配置](/configuration.md)
 + [获取 vote_id](/vote_id.md)
 + [`.ivi` 文件和 `ivitools` 相关](/ivifile.md)
-+ [自定义请求库](/request_client.md)
++ [模块请求库相关](/request_client.md)
 + API 示例
+    + [activity.py - 活动](/examples/activity.md)
     + [app.py - 应用程序](/examples/app.md)
     + [article_category.py - 专栏分类](/examples/article_category.md)
     + [article.py - 专栏](/examples/article.md)
@@ -49,6 +50,7 @@
     + [watchroom.py - 放映室](/examples/watchroom.md)
 + API 文档
   + [根模块](/modules/bilibili_api.md)
+    + [activity.py - 活动](/modules/activity.md)
   + [app.py - 应用程序](/modules/app.md)
   + [article_category.py - 专栏分类](/modules/article_category.md)
   + [article.py - 专栏](/modules/article.md)
